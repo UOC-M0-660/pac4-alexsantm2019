@@ -11,13 +11,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.uoc.pac4.R
 import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.TwitchApiService
 import edu.uoc.pac4.data.network.Network
 import edu.uoc.pac4.data.network.UnauthorizedException
+import edu.uoc.pac4.data.streams.StreamsRepository
 import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.ui.profile.ProfileActivity
 import kotlinx.android.synthetic.main.activity_streams.*
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 
 class StreamsActivity : AppCompatActivity() {
 
@@ -26,7 +27,8 @@ class StreamsActivity : AppCompatActivity() {
     private val adapter = StreamsAdapter()
     private val layoutManager = LinearLayoutManager(this)
 
-    private val twitchApiService = TwitchApiService(Network.createHttpClient(this))
+    //private val twitchApiService = TwitchApiService(Network.createHttpClient(this))
+    private val streamsRepository by inject<StreamsRepository>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,7 +74,8 @@ class StreamsActivity : AppCompatActivity() {
         // Get Twitch Streams
         lifecycleScope.launch {
             try {
-                twitchApiService.getStreams(cursor)?.let { response ->
+//                twitchApiService.getStreams(cursor)?.let { response ->
+                    streamsRepository.getStreams(cursor)?.let { response ->
                     // Success :)
                     Log.d("StreamsActivity", "Got Streams: $response")
 
