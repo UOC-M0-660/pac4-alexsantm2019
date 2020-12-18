@@ -22,15 +22,18 @@ import edu.uoc.pac4.data.oauth.OAuthConstants
 import kotlinx.android.synthetic.main.activity_oauth.*
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.get
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {
 
     private val TAG = "StreamsActivity"
+    private val oAuthViewModel by viewModel<OAuthViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_oauth)
         launchOAuthAuthorization()
+        observerLogin()
     }
 
     fun buildOAuthUri(): Uri {
@@ -93,50 +96,12 @@ class OAuthActivity : AppCompatActivity() {
 
         // Show Loading Indicator
         progressBar.visibility = View.VISIBLE
+        oAuthViewModel.login(authorizationCode)
+    }
 
-        // Create Twitch Service
-//        val service = TwitchApiService(Network.createHttpClient(this))
-//        // Launch new thread attached to this Activity.
-//        // If the Activity is closed, this Thread will be cancelled
-//        lifecycleScope.launch {
-//
-//            // Launch get Tokens Request
-//            service.getTokens(authorizationCode)?.let { response ->
-//                // Success :)
-//
-//                Log.d(TAG, "Got Access token ${response.accessToken}")
-//
-//                // Save access token and refresh token using the SessionManager class
-//                val sessionManager = SessionManager(this@OAuthActivity)
-//                sessionManager.saveAccessToken(response.accessToken)
-//                response.refreshToken?.let {
-//                    sessionManager.saveRefreshToken(it)
-//                }
-//            } ?: run {
-//                // Failure :(
-//
-//                // Show Error Message
-//                Toast.makeText(
-//                    this@OAuthActivity,
-//                    getString(R.string.error_oauth),
-//                    Toast.LENGTH_LONG
-//                ).show()
-//                // Restart Activity
-//                finish()
-//                startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
-//            }
-//
-//            // Hide Loading Indicator
-//            progressBar.visibility = View.GONE
-//
-//            // Restart app to navigate to StreamsActivity
-//            startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
-//            finish()
-//        }
-
-        val authenticationRepository = get<AuthenticationRepository>()
-        lifecycleScope.launch {
-            if (authenticationRepository.login(authorizationCode)){
+    private fun observerLogin(){
+        oAuthViewModel.isLoginSuccessful.observe(this){
+            if (it){
                 progressBar.visibility = View.GONE
                 // Restart app to navigate to StreamsActivity
                 startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
@@ -153,6 +118,5 @@ class OAuthActivity : AppCompatActivity() {
                 startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
             }
         }
-
     }
 }

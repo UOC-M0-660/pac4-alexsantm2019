@@ -19,7 +19,6 @@ class StreamsDataSource(private val httpClient: HttpClient) {
                 }
             return response
         } catch (t: Throwable) {
-            Log.w(TAG, "Error getting streams", t)
             // Try to handle error
             return when (t) {
                 is ClientRequestException -> {

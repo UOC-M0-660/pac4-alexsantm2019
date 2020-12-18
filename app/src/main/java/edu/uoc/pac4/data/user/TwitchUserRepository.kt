@@ -11,6 +11,7 @@ class TwitchUserRepository(
     private val userDataSource: UserDataSource
 ) : UserRepository {
 
+    @Throws(UnauthorizedException::class)
     override suspend fun getUser(): User? {
         return userDataSource.getUser()
     }
