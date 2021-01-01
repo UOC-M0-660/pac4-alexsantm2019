@@ -5,7 +5,6 @@ import edu.uoc.pac4.data.network.Endpoints
 import edu.uoc.pac4.data.network.UnauthorizedException
 import io.ktor.client.*
 import io.ktor.client.features.*
-import io.ktor.client.features.get
 import io.ktor.client.request.*
 
 class UserDataSource(private val httpClient: HttpClient) {

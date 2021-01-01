@@ -1,6 +1,5 @@
 package edu.uoc.pac4.data.streams
 
-import android.util.Log
 import edu.uoc.pac4.data.network.Endpoints
 import edu.uoc.pac4.data.network.UnauthorizedException
 import io.ktor.client.*

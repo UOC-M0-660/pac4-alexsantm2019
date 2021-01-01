@@ -2,7 +2,6 @@ package edu.uoc.pac4.ui.login.oauth
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,18 +9,12 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
-import edu.uoc.pac4.ui.LaunchActivity
+import androidx.appcompat.app.AppCompatActivity
 import edu.uoc.pac4.R
-import edu.uoc.pac4.data.SessionManager
-
 import edu.uoc.pac4.data.network.Endpoints
-import edu.uoc.pac4.data.network.Network
-import edu.uoc.pac4.data.oauth.AuthenticationRepository
 import edu.uoc.pac4.data.oauth.OAuthConstants
+import edu.uoc.pac4.ui.LaunchActivity
 import kotlinx.android.synthetic.main.activity_oauth.*
-import kotlinx.coroutines.launch
-import org.koin.android.ext.android.get
 import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {

@@ -7,8 +7,7 @@ import edu.uoc.pac4.data.oauth.AuthenticationRepository
 import kotlinx.coroutines.launch
 
 class OAuthViewModel(
-    private val authenticationRepository: AuthenticationRepository
-): ViewModel() {
+    private val authenticationRepository: AuthenticationRepository): ViewModel() {
 
         val isLoginSuccessful = MutableLiveData<Boolean>()
 
