@@ -2,7 +2,6 @@ package edu.uoc.pac4.ui.login.oauth
 
 import android.content.Intent
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,25 +9,24 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
-import androidx.lifecycle.lifecycleScope
-import edu.uoc.pac4.ui.LaunchActivity
+import androidx.appcompat.app.AppCompatActivity
 import edu.uoc.pac4.R
-import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.TwitchApiService
 import edu.uoc.pac4.data.network.Endpoints
-import edu.uoc.pac4.data.network.Network
 import edu.uoc.pac4.data.oauth.OAuthConstants
+import edu.uoc.pac4.ui.LaunchActivity
 import kotlinx.android.synthetic.main.activity_oauth.*
-import kotlinx.coroutines.launch
+import org.koin.android.viewmodel.ext.android.viewModel
 
 class OAuthActivity : AppCompatActivity() {
 
     private val TAG = "StreamsActivity"
+    private val oAuthViewModel by viewModel<OAuthViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_oauth)
         launchOAuthAuthorization()
+        observerLogin()
     }
 
     fun buildOAuthUri(): Uri {
@@ -91,28 +89,17 @@ class OAuthActivity : AppCompatActivity() {
 
         // Show Loading Indicator
         progressBar.visibility = View.VISIBLE
+        oAuthViewModel.login(authorizationCode)
+    }
 
-        // Create Twitch Service
-        val service = TwitchApiService(Network.createHttpClient(this))
-        // Launch new thread attached to this Activity.
-        // If the Activity is closed, this Thread will be cancelled
-        lifecycleScope.launch {
-
-            // Launch get Tokens Request
-            service.getTokens(authorizationCode)?.let { response ->
-                // Success :)
-
-                Log.d(TAG, "Got Access token ${response.accessToken}")
-
-                // Save access token and refresh token using the SessionManager class
-                val sessionManager = SessionManager(this@OAuthActivity)
-                sessionManager.saveAccessToken(response.accessToken)
-                response.refreshToken?.let {
-                    sessionManager.saveRefreshToken(it)
-                }
-            } ?: run {
-                // Failure :(
-
+    private fun observerLogin(){
+        oAuthViewModel.isLoginSuccessful.observe(this){
+            if (it){
+                progressBar.visibility = View.GONE
+                // Restart app to navigate to StreamsActivity
+                startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
+                finish()
+            }else{
                 // Show Error Message
                 Toast.makeText(
                     this@OAuthActivity,
@@ -123,13 +110,6 @@ class OAuthActivity : AppCompatActivity() {
                 finish()
                 startActivity(Intent(this@OAuthActivity, OAuthActivity::class.java))
             }
-
-            // Hide Loading Indicator
-            progressBar.visibility = View.GONE
-
-            // Restart app to navigate to StreamsActivity
-            startActivity(Intent(this@OAuthActivity, LaunchActivity::class.java))
-            finish()
         }
     }
 }

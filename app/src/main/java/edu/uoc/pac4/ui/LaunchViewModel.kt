@@ -14,12 +14,10 @@ import kotlinx.coroutines.launch
 // you can connect to it from the LaunchActivity and use it
 // or just remove it
 class LaunchViewModel(
-    private val repository: AuthenticationRepository
-) : ViewModel() {
+    private val repository: AuthenticationRepository) : ViewModel() {
 
     // Live Data
     val isUserAvailable = MutableLiveData<Boolean>()
-
 
     // Public function that can be called from the view (Activity)
     fun getUserAvailability() {
