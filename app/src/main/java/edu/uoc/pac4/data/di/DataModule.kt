@@ -23,14 +23,21 @@ val dataModule = module {
     // Streams example
     // single<StreamsRepository> { TwitchStreamsRepository() }
 
-    // Data Sources
+    // -----  Data Sources -----
     single { SessionManager(get()) }
     single { TokensDataSource(Network.createHttpClient(get())) }
     single { StreamsDataSource(Network.createHttpClient(get())) }
     single { UserDataSource(Network.createHttpClient(get())) }
 
-    // Repositories
+    //  ----- Repositories -------
+
+    // Authentication
     single<AuthenticationRepository>{ OAuthAuthenticationRepository(get(), get()) }
+
+    // Streams
     single<StreamsRepository> { TwitchStreamsRepository(get()) }
+
+    // User
     single<UserRepository> { TwitchUserRepository(get()) }
+
 }

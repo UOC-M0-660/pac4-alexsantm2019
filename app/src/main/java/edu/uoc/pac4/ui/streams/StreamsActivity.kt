@@ -2,16 +2,12 @@ package edu.uoc.pac4.ui.streams
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import edu.uoc.pac4.R
-import edu.uoc.pac4.data.SessionManager
-import edu.uoc.pac4.data.network.UnauthorizedException
-import edu.uoc.pac4.ui.login.LoginActivity
 import edu.uoc.pac4.ui.profile.ProfileActivity
 import kotlinx.android.synthetic.main.activity_streams.*
 import org.koin.android.viewmodel.ext.android.viewModel
@@ -24,9 +20,6 @@ class StreamsActivity : AppCompatActivity() {
     private val layoutManager = LinearLayoutManager(this)
     private val streamsViewModel by viewModel<StreamsViewModel>()
 
-    //private val twitchApiService = TwitchApiService(Network.createHttpClient(this))
-//    private val streamsRepository by inject<StreamsRepository>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_streams)
@@ -37,7 +30,6 @@ class StreamsActivity : AppCompatActivity() {
             getStreams()
         }
 
-        observerStreams()
         // Get Streams
         getStreams()
     }
@@ -53,12 +45,10 @@ class StreamsActivity : AppCompatActivity() {
                 //getStreams(nextCursor)
                 getStreams()
             }
-
             override fun isLastPage(): Boolean {
                 //return nextCursor == null
-                return streamsViewModel.nextCursor == null
+                return streamsViewModel.isCursorNull()
             }
-
             override fun isLoading(): Boolean {
                 return swipeRefreshLayout.isRefreshing
             }
@@ -66,36 +56,40 @@ class StreamsActivity : AppCompatActivity() {
     }
 
     private fun getStreams() {
-        // Show Loading
-        swipeRefreshLayout.isRefreshing = true
-        try {
+            // Get Streams
             streamsViewModel.getStreams()
-            // Hide Loading
-            swipeRefreshLayout.isRefreshing = false
-        } catch (t: UnauthorizedException) {
-            Log.w(TAG, "Unauthorized Error getting streams", t)
-            // Clear local access token
-            SessionManager(this@StreamsActivity).clearAccessToken()
-            // User was logged out, close screen and open login
-            finish()
-            startActivity(Intent(this@StreamsActivity, LoginActivity::class.java))
-        }
+
+            // Observe ViewModel Values
+            // Stream List
+            streamsViewModel.streamList.observe(this, { streamList ->
+                // Update UI with Streams
+                if (adapter.currentList.isNotEmpty()) {
+                    // We are adding more items to the list
+                    adapter.submitList(adapter.currentList.plus(streamList))
+                } else {
+                    // It's the first n items, no pagination yet
+                    adapter.submitList(streamList)
+                }
+            })
+
+            // isRefreshing
+            streamsViewModel.isRefreshing.observe(this, { isRefreshing ->
+                // Shows loading icon
+                swipeRefreshLayout.isRefreshing = isRefreshing
+            })
+
+            // Show Error
+            streamsViewModel.showError.observe(this, { showError ->
+                // Show Error message to not leave the page empty
+                if (adapter.currentList.isNullOrEmpty() && showError) {
+                    Toast.makeText(
+                        this@StreamsActivity,
+                        getString(R.string.error_streams), Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
     }
 
-    private fun observerStreams(){
-        streamsViewModel.streams.observe(this){streams ->
-            Log.i(TAG, "observeStreams: "+ streams.size)
-            adapter.submitList(streams)
-            if (adapter.currentList.isNullOrEmpty()){
-                Toast.makeText(
-                    this@StreamsActivity,
-                    getString(R.string.error_streams), Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
-    }
-
-    // region Menu
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         // Inflate Menu
         menuInflater.inflate(R.menu.menu_streams, menu)
@@ -112,6 +106,5 @@ class StreamsActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-    // endregion
 
 }

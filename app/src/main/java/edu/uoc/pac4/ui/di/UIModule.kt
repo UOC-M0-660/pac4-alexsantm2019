@@ -17,10 +17,16 @@ val uiModule = module {
     // LaunchViewModel example
     // viewModel { LaunchViewModel(repository = get()) }
 
-    // LaunchViewModel example
+    // LaunchViewModel
     viewModel { LaunchViewModel(repository = get()) }
-    viewModel { StreamsViewModel(get()) }
-    viewModel { ProfileViewModel(get(), get()) }
+
+    // OAuthViewModel
     viewModel { OAuthViewModel(get()) }
+
+    // StreamsViewModel
+    viewModel { StreamsViewModel(streamsRepository = get(), authenticationRepository = get()) }
+
+    // ProfileViewModel
+    viewModel { ProfileViewModel(get(), get()) }
 
 }

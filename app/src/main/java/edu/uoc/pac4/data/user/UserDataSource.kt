@@ -9,6 +9,7 @@ import io.ktor.client.request.*
 
 class UserDataSource(private val httpClient: HttpClient) {
     private val TAG = "UserDataSource"
+
     /// Gets Current Authorized User on Twitch
     @Throws(UnauthorizedException::class)
     suspend fun getUser(): User? {
